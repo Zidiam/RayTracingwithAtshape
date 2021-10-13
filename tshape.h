@@ -1,0 +1,81 @@
+//
+// Created by ginza on 10/11/2021.
+//
+
+#ifndef RAYTRACING_TSHAPE_H
+#define RAYTRACING_TSHAPE_H
+
+#include "rtweekend.h"
+
+#include "aarect.h"
+#include "hittable_list.h"
+
+class tshape : public hittable  {
+public:
+    tshape() {}
+    tshape(const point3& p0, const point3& p1, shared_ptr<material> ptr);
+
+    virtual bool hit(const ray& r, double t_min, double t_max, hit_record& rec) const override;
+
+    virtual bool bounding_box(double time0, double time1, aabb& output_box) const override {
+        output_box = aabb(box_min, box_max);
+        return true;
+    }
+
+public:
+    point3 box_min;
+    point3 box_max;
+    hittable_list sides;
+};
+
+tshape::tshape(const point3& p0, const point3& p1, shared_ptr<material> ptr) {
+    box_min = p0;
+    box_max = p1;
+
+    //firstbox
+    sides.add(make_shared<xy_rect>(p0.x(), p1.x(), p0.y(), p1.y(), p1.z(), ptr));
+    sides.add(make_shared<xy_rect>(p0.x(), p1.x(), p0.y(), p1.y(), p0.z(), ptr));
+
+    sides.add(make_shared<xz_rect>(p0.x(), p1.x(), p0.z(), p1.z(), p1.y(), ptr));
+    sides.add(make_shared<xz_rect>(p0.x(), p1.x(), p0.z(), p1.z(), p0.y(), ptr));
+
+    sides.add(make_shared<yz_rect>(p0.y(), p1.y(), p0.z(), p1.z(), p1.x(), ptr));
+    sides.add(make_shared<yz_rect>(p0.y(), p1.y(), p0.z(), p1.z(), p0.x(), ptr));
+
+    //secondbox
+    sides.add(make_shared<xy_rect>(p0.x(), p1.x(), p0.y()+50, p1.y()+50, p1.z(), ptr));
+    sides.add(make_shared<xy_rect>(p0.x(), p1.x(), p0.y()+50, p1.y()+50, p0.z(), ptr));
+
+    sides.add(make_shared<xz_rect>(p0.x(), p1.x(), p0.z(), p1.z(), p1.y()+50, ptr));
+    sides.add(make_shared<xz_rect>(p0.x(), p1.x(), p0.z(), p1.z(), p0.y()+50, ptr));
+
+    sides.add(make_shared<yz_rect>(p0.y()+50, p1.y()+50, p0.z(), p1.z(), p1.x(), ptr));
+    sides.add(make_shared<yz_rect>(p0.y()+50, p1.y()+50, p0.z(), p1.z(), p0.x(), ptr));
+
+    //thirdbox
+    sides.add(make_shared<xy_rect>(p0.x(), p1.x(), p0.y()-50, p1.y()-50, p1.z(), ptr));
+    sides.add(make_shared<xy_rect>(p0.x(), p1.x(), p0.y()-50, p1.y()-50, p0.z(), ptr));
+
+    sides.add(make_shared<xz_rect>(p0.x(), p1.x(), p0.z(), p1.z(), p1.y()-50, ptr));
+    sides.add(make_shared<xz_rect>(p0.x(), p1.x(), p0.z(), p1.z(), p0.y()-50, ptr));
+
+    sides.add(make_shared<yz_rect>(p0.y()-50, p1.y()-50, p0.z(), p1.z(), p1.x(), ptr));
+    sides.add(make_shared<yz_rect>(p0.y()-50, p1.y()-50, p0.z(), p1.z(), p0.x(), ptr));
+
+    //fourthbox
+    sides.add(make_shared<xy_rect>(p0.x()-100, p1.x()-100, p0.y(), p1.y(), p1.z(), ptr));
+    sides.add(make_shared<xy_rect>(p0.x()-100, p1.x()-100, p0.y(), p1.y(), p0.z(), ptr));
+
+    sides.add(make_shared<xz_rect>(p0.x()-100, p1.x()-100, p0.z(), p1.z(), p1.y(), ptr));
+    sides.add(make_shared<xz_rect>(p0.x()-100, p1.x()-100, p0.z(), p1.z(), p0.y(), ptr));
+
+    sides.add(make_shared<yz_rect>(p0.y(), p1.y(), p0.z(), p1.z(), p1.x()-100, ptr));
+    sides.add(make_shared<yz_rect>(p0.y(), p1.y(), p0.z(), p1.z(), p0.x()-100, ptr));
+}
+
+bool tshape::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
+    return sides.hit(r, t_min, t_max, rec);
+}
+
+
+#endif //RAYTRACING_TSHAPE_H
